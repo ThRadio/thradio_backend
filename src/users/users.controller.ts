@@ -7,10 +7,15 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+//Swagger
+import { ApiTags } from '@nestjs/swagger';
+//Services
 import { UsersService } from './users.service';
+//Dto
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

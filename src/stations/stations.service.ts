@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
+//Services
 import { DbService } from 'src/db/db.service';
+import { SupervisorService } from 'src/supervisor/supervisor.service';
+//Classes
+import { StationClass } from './classes/station.class';
+//Dto
 import { CreateStationDto } from './dto/create-station.dto';
 import { UpdateStationDto } from './dto/update-station.dto';
+//Libreries
 import { create } from 'xmlbuilder2';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SupervisorService } from 'src/supervisor/supervisor.service';
 
 @Injectable()
 export class StationsService {
@@ -14,7 +19,7 @@ export class StationsService {
     private readonly supervisor: SupervisorService,
   ) {}
 
-  async create(createStationDto: CreateStationDto) {
+  async create(createStationDto: CreateStationDto): Promise<StationClass> {
     const station = await this.dbService.stations().insert(createStationDto);
     // Station directory path
     const station_path = path.join(
@@ -41,19 +46,22 @@ export class StationsService {
     return station;
   }
 
-  async findAll() {
+  async findAll(): Promise<StationClass[]> {
     return await this.dbService.stations().find({});
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<StationClass> {
     return await this.dbService.stations().findOne({ _id: id });
   }
 
-  async update(id: string, updateStationDto: UpdateStationDto) {
+  async update(
+    id: string,
+    updateStationDto: UpdateStationDto,
+  ): Promise<StationClass> {
     const station_path = path.join('/backend', 'stations', `ThRadio_${id}`);
-    const station = await this.dbService
+    await this.dbService
       .stations()
-      .update({ _id: id }, updateStationDto);
+      .update<StationClass>({ _id: id }, updateStationDto);
     // Create icecast.xml file
     await this.createIcecast(station_path, {
       name: updateStationDto.name,
@@ -61,20 +69,19 @@ export class StationsService {
       icecast_port: updateStationDto.icecast_port,
     });
     await this.supervisor.restartProcess(`ThRadio_${id}`);
-    return station;
+    return await this.dbService.stations().findOne({ _id: id });
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     const station_path = path.join('/backend', 'stations', `ThRadio_${id}`);
     //Remove station of db
-    const station = await this.dbService.stations().remove({ _id: id }, {});
+    await this.dbService.stations().remove({ _id: id }, {});
     // Remove station folder
     if (fs.existsSync(station_path)) {
       fs.rmdirSync(station_path, { recursive: true });
     }
     // Reload supervisor
     await this.supervisor.reloadSupervisor();
-    return station;
   }
 
   createIcecast(
@@ -82,7 +89,7 @@ export class StationsService {
     station: {
       name: string;
       icecast_password: string;
-      icecast_port: string;
+      icecast_port: number;
     },
   ) {
     return new Promise<void>((resolve) => {

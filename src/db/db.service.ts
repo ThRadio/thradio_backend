@@ -8,15 +8,23 @@ import * as path from 'path';
 export class DbService {
   private db: {
     stations: Datastore;
+    users: Datastore;
+    app: Datastore;
   } = {
     stations: Db.create(path.join('db', 'stations.dat')),
+    users: Db.create(path.join('db', 'users.dat')),
+    app: Db.create(path.join('db', 'app.dat')),
   };
-
-  constructor() {
-    this.db.stations.persistence.setAutocompactionInterval(5000);
-  }
 
   stations() {
     return this.db.stations;
+  }
+
+  users() {
+    return this.db.users;
+  }
+
+  app() {
+    return this.db.app;
   }
 }
