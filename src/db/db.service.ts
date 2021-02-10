@@ -10,21 +10,43 @@ export class DbService {
     stations: Datastore;
     users: Datastore;
     app: Datastore;
+    tokens: Datastore;
   } = {
-    stations: Db.create(path.join('db', 'stations.dat')),
-    users: Db.create(path.join('db', 'users.dat')),
-    app: Db.create(path.join('db', 'app.dat')),
+    stations: Db.create({
+      filename: path.join('db', 'stations.dat'),
+      autoload: true,
+    }),
+    users: Db.create({
+      filename: path.join('db', 'users.dat'),
+      autoload: true,
+    }),
+    app: Db.create({
+      filename: path.join('db', 'app.dat'),
+      autoload: true,
+    }),
+    tokens: Db.create({
+      filename: path.join('db', 'tokens.dat'),
+      autoload: true,
+    }),
   };
 
   stations() {
+    this.db.stations.persistence.compactDatafile();
     return this.db.stations;
   }
 
   users() {
+    this.db.users.persistence.compactDatafile();
     return this.db.users;
   }
 
   app() {
+    this.db.app.persistence.compactDatafile();
     return this.db.app;
+  }
+
+  tokens() {
+    this.db.tokens.persistence.compactDatafile();
+    return this.db.tokens;
   }
 }

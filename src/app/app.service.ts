@@ -32,11 +32,33 @@ export class AppService {
   }
 
   async setConfig(setConfigDto: SetConfigDto): Promise<void> {
-    await this.dbService.app().insert<ConfigClass>(setConfigDto);
+    await this.dbService
+      .app()
+      .update<ConfigClass>(
+        { _id: 'config' },
+        { _id: 'config', ...setConfigDto },
+        { upsert: true },
+      );
+  }
+
+  async getConfig() {
+    return await this.dbService.app().findOne<ConfigClass>({ _id: 'config' });
   }
 
   async initialConfig(initialDto: InitialDto): Promise<void> {
     await this.setConfig(initialDto.config);
-    await this.usersService.create(initialDto.user);
+    await this.usersService.create({
+      name: initialDto.user.name,
+      email: initialDto.user.email,
+      password: initialDto.user.password,
+      role: 'admin',
+    });
+    await this.dbService.app().update(
+      { _id: 'completed' },
+      {
+        user: true,
+        config: true,
+      },
+    );
   }
 }

@@ -7,7 +7,8 @@ export class CreateUserDto {
   @IsString()
   password: string;
   @IsString()
-  role: string;
+  @IsOptional()
+  role?: string;
   @IsString()
   @IsOptional()
   station?: string;

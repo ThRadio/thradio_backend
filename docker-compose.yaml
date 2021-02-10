@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   backend:
@@ -9,9 +9,18 @@ services:
     volumes:
       - stations_data:/backend/stations
       - db_data:/backend/db
+    networks:
+      - backend
+    environment:
+      - JWT_SECRET
 
 volumes:
   stations_data:
     name: thradio_stations_data
   db_data:
     name: thradio_db_data
+
+networks:
+  backend:
+    name: thradio_backend
+    driver: bridge
