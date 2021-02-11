@@ -36,6 +36,7 @@ export class StationsService {
       name: station.name,
       icecast_password: station.icecast_password,
       icecast_port: station.icecast_port,
+      description: station.description,
     });
     // Create supervisord.conf file
     await this.createSupervisor(station_path, {
@@ -63,11 +64,7 @@ export class StationsService {
       .stations()
       .update<StationClass>({ _id: id }, updateStationDto);
     // Create icecast.xml file
-    await this.createIcecast(station_path, {
-      name: updateStationDto.name,
-      icecast_password: updateStationDto.icecast_password,
-      icecast_port: updateStationDto.icecast_port,
-    });
+    await this.createIcecast(station_path, updateStationDto);
     await this.supervisor.restartProcess(`ThRadio_${id}`);
     return await this.dbService.stations().findOne({ _id: id });
   }
@@ -84,14 +81,7 @@ export class StationsService {
     await this.supervisor.reloadSupervisor();
   }
 
-  createIcecast(
-    station_path: string,
-    station: {
-      name: string;
-      icecast_password: string;
-      icecast_port: number;
-    },
-  ) {
+  createIcecast(station_path: string, station: StationClass) {
     return new Promise<void>((resolve) => {
       const obj = {
         icecast: {
@@ -118,6 +108,9 @@ export class StationsService {
             'mount-name': '/radio.mp3',
             charset: 'UTF8',
             'stream-name': station.name,
+            'stream-description': station.description || '',
+            'stream-url': '',
+            genre: station.genre || '',
           },
           fileserve: 1,
           paths: {

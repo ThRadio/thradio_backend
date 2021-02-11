@@ -10,4 +10,7 @@ export class CreateStationDto {
   icecast_password: string;
   @IsNumber()
   icecast_port: number;
+  @IsString()
+  @IsOptional()
+  genre?: string;
 }
