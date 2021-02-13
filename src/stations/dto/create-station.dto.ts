@@ -13,4 +13,7 @@ export class CreateStationDto {
   @IsString()
   @IsOptional()
   genre?: string;
+  @IsNumber()
+  @IsOptional()
+  listeners?: number;
 }

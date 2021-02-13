@@ -5,4 +5,5 @@ export class StationClass {
   icecast_password?: string;
   icecast_port?: number;
   genre?: string;
+  listeners?: number;
 }

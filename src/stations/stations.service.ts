@@ -87,7 +87,7 @@ export class StationsService {
         icecast: {
           location: 'ThRadio',
           limits: {
-            clients: 250,
+            clients: station.listeners || 250,
             sources: 1,
             'queue-size': 524288,
             'client-timeout': 30,
