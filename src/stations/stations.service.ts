@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 //Services
 import { DbService } from 'src/db/db.service';
 import { SupervisorService } from 'src/supervisor/supervisor.service';
 //Classes
 import { StationClass } from './classes/station.class';
+import { StatisticsClass } from './classes/statistics.class';
 //Dto
 import { CreateStationDto } from './dto/create-station.dto';
 import { UpdateStationDto } from './dto/update-station.dto';
@@ -17,6 +18,7 @@ export class StationsService {
   constructor(
     private readonly dbService: DbService,
     private readonly supervisor: SupervisorService,
+    private httpService: HttpService,
   ) {}
 
   async create(createStationDto: CreateStationDto): Promise<StationClass> {
@@ -171,5 +173,23 @@ export class StationsService {
   }
   async restart(id: string) {
     await this.supervisor.restartProcess(`ThRadio_${id}`);
+  }
+
+  //Icecast
+  async statistics(port: number): Promise<StatisticsClass> {
+    try {
+      const { data } = await this.httpService
+        .get(`http://stations:${port}/status-json.xsl`)
+        .toPromise();
+      return {
+        listeners: data.icestats.listeners || 0,
+        listeners_peak: data.icestats.listener_peak || 0,
+      };
+    } catch (error) {
+      return {
+        listeners: 0,
+        listeners_peak: 0,
+      };
+    }
   }
 }

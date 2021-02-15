@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { StationsService } from './stations.service';
 //Classes
 import { StationClass } from './classes/station.class';
+import { StatisticsClass } from './classes/statistics.class';
 //Dto
 import { CreateStationDto } from './dto/create-station.dto';
 import { UpdateStationDto } from './dto/update-station.dto';
@@ -86,5 +87,13 @@ export class StationsController {
   @Get('restart/:id')
   async restart(@Param('id') id: string) {
     await this.stationsService.restart(id);
+  }
+
+  //Icecast
+  @UseGuards(AuthGuard)
+  @SetMetadata('roles', ['admin'])
+  @Get('statistics/:port')
+  async statistics(@Param('port') port: number): Promise<StatisticsClass> {
+    return await this.stationsService.statistics(port);
   }
 }
