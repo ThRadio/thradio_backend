@@ -52,7 +52,14 @@ export class StationsService {
   }
 
   async findOne(id: string): Promise<StationClass> {
-    return await this.dbService.stations().findOne({ _id: id });
+    const station = await this.dbService.stations().findOne({ _id: id });
+    const { state } = await this.supervisor.getProcessInfo(
+      `ThRadio_${station._id}`,
+    );
+    return {
+      state,
+      ...station,
+    };
   }
 
   async update(
@@ -153,5 +160,16 @@ export class StationsService {
       );
       resolve();
     });
+  }
+
+  //Supervisor
+  async start(id: string) {
+    await this.supervisor.startProcess(`ThRadio_${id}`);
+  }
+  async stop(id: string) {
+    await this.supervisor.stopProcess(`ThRadio_${id}`);
+  }
+  async restart(id: string) {
+    await this.supervisor.restartProcess(`ThRadio_${id}`);
   }
 }

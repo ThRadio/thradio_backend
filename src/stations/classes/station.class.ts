@@ -6,4 +6,6 @@ export class StationClass {
   icecast_port?: number;
   genre?: string;
   listeners?: number;
+  //Supervisor
+  state?: number;
 }

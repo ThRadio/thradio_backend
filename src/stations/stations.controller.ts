@@ -65,4 +65,26 @@ export class StationsController {
   async remove(@Param('id') id: string) {
     return await this.stationsService.remove(id);
   }
+
+  //Supervisor
+  @UseGuards(AuthGuard)
+  @SetMetadata('roles', ['admin'])
+  @Get('start/:id')
+  async start(@Param('id') id: string) {
+    await this.stationsService.start(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @SetMetadata('roles', ['admin'])
+  @Get('stop/:id')
+  async stop(@Param('id') id: string) {
+    await this.stationsService.stop(id);
+  }
+
+  @UseGuards(AuthGuard)
+  @SetMetadata('roles', ['admin'])
+  @Get('restart/:id')
+  async restart(@Param('id') id: string) {
+    await this.stationsService.restart(id);
+  }
 }

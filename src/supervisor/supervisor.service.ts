@@ -19,6 +19,18 @@ export class SupervisorService {
     );
   }
 
+  getProcessInfo(name: string): Promise<any> {
+    return new Promise((resolve) => {
+      this.supervisor.methodCall(
+        'supervisor.getProcessInfo',
+        [name],
+        (error, result) => {
+          if (result) resolve(result);
+        },
+      );
+    });
+  }
+
   startProcess(name: string): Promise<boolean> {
     return new Promise((resolve) => {
       this.supervisor.methodCall(
