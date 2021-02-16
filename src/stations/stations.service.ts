@@ -182,8 +182,8 @@ export class StationsService {
         .get(`http://stations:${port}/status-json.xsl`)
         .toPromise();
       return {
-        listeners: data.icestats.listeners || 0,
-        listeners_peak: data.icestats.listener_peak || 0,
+        listeners: data.icestats.source.listeners || 0,
+        listeners_peak: data.icestats.source.listener_peak || 0,
       };
     } catch (error) {
       return {
