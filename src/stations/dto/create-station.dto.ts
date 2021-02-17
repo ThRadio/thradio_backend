@@ -16,4 +16,7 @@ export class CreateStationDto {
   @IsNumber()
   @IsOptional()
   listeners?: number;
+  @IsString()
+  @IsOptional()
+  user?: string;
 }

@@ -27,10 +27,10 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  async findOne(email: string) {
+  async findOne(username: string) {
     const user = await this.dbService
       .users()
-      .findOne<UserClass>({ email: email });
+      .findOne<UserClass>({ username: username });
     return user;
   }
 

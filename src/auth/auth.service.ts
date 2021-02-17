@@ -19,8 +19,11 @@ export class AuthService {
     private dbService: DbService,
   ) {}
 
-  private async validateUser(email: string, pass: string): Promise<UserClass> {
-    const user = await this.usersService.findOne(email);
+  private async validateUser(
+    username: string,
+    pass: string,
+  ): Promise<UserClass> {
+    const user = await this.usersService.findOne(username);
     if (user && (await compare(pass, user.password))) {
       return user;
     }
@@ -28,8 +31,13 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
-    const payload = { email: user.email, sub: user._id, role: user.role };
+    const user = await this.validateUser(loginDto.username, loginDto.password);
+    const payload = {
+      username: user.username,
+      email: user.email,
+      sub: user._id,
+      role: user.role,
+    };
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: await this.generateRefreshToken(user),
@@ -70,6 +78,7 @@ export class AuthService {
     }
     return {
       access_token: this.jwtService.sign({
+        username: user.username,
         email: user.email,
         sub: user._id,
         role: user.role,
@@ -84,8 +93,8 @@ export class AuthService {
     });
   }
 
-  async profile(email: string) {
-    const user = await this.usersService.findOne(email);
+  async profile(username: string) {
+    const user = await this.usersService.findOne(username);
     const { password, ...newUser } = user;
     return newUser;
   }

@@ -49,6 +49,7 @@ export class AppService {
     await this.setConfig(initialDto.config);
     await this.usersService.create({
       name: initialDto.user.name,
+      username: initialDto.user.username,
       email: initialDto.user.email,
       password: initialDto.user.password,
       role: 'admin',
