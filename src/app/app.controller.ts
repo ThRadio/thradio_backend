@@ -47,4 +47,11 @@ export class AppController {
   async updateConfig(@Body() configDto: SetConfigDto) {
     return await this.appService.setConfig(configDto);
   }
+
+  @Get('info')
+  @UseGuards(AuthGuard)
+  @SetMetadata('roles', ['admin'])
+  async info() {
+    return await this.appService.info();
+  }
 }

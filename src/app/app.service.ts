@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 //Services
 import { DbService } from 'src/db/db.service';
 import { UsersService } from 'src/users/users.service';
@@ -14,6 +14,7 @@ export class AppService {
   constructor(
     private readonly dbService: DbService,
     private readonly usersService: UsersService,
+    private readonly httpService: HttpService,
   ) {}
 
   async completedGet() {
@@ -61,5 +62,20 @@ export class AppService {
         config: true,
       },
     );
+  }
+
+  async info() {
+    try {
+      const info = await this.httpService
+        .get(
+          'https://raw.githubusercontent.com/ThRadio/ThRadio/stable/package.json',
+        )
+        .toPromise();
+      return info.data;
+    } catch (error) {
+      return {
+        version: '100.0.0',
+      };
+    }
   }
 }
