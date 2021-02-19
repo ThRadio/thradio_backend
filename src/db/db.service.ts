@@ -15,18 +15,22 @@ export class DbService {
     stations: Db.create({
       filename: path.join('db', 'stations.dat'),
       autoload: true,
+      timestampData: true,
     }),
     users: Db.create({
       filename: path.join('db', 'users.dat'),
       autoload: true,
+      timestampData: true,
     }),
     app: Db.create({
       filename: path.join('db', 'app.dat'),
       autoload: true,
+      timestampData: true,
     }),
     tokens: Db.create({
       filename: path.join('db', 'tokens.dat'),
       autoload: true,
+      timestampData: true,
     }),
   };
 
