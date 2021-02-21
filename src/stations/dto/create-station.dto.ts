@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 export class CreateStationDto {
   @IsString()
@@ -16,7 +24,8 @@ export class CreateStationDto {
   @IsNumber()
   @IsOptional()
   listeners?: number;
-  @IsString()
+  @Type(() => CreateUserDto)
+  @ValidateNested()
   @IsOptional()
-  user?: string;
+  user: CreateUserDto;
 }

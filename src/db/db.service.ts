@@ -34,6 +34,29 @@ export class DbService {
     }),
   };
 
+  constructor() {
+    //Stations index
+    this.db.stations.ensureIndex({
+      fieldName: 'user',
+      unique: true,
+      sparse: true,
+    });
+    //Users index
+    this.db.stations.ensureIndex({
+      fieldName: 'email',
+      unique: true,
+    });
+    this.db.stations.ensureIndex({
+      fieldName: 'username',
+      unique: true,
+    });
+    this.db.stations.ensureIndex({
+      fieldName: 'station',
+      unique: true,
+      sparse: true,
+    });
+  }
+
   stations() {
     this.db.stations.persistence.compactDatafile();
     return this.db.stations;

@@ -2,6 +2,7 @@ import { HttpService, Injectable } from '@nestjs/common';
 //Services
 import { DbService } from 'src/db/db.service';
 import { SupervisorService } from 'src/supervisor/supervisor.service';
+import { UsersService } from 'src/users/users.service';
 //Classes
 import { StationClass } from './classes/station.class';
 import { StatisticsClass } from './classes/statistics.class';
@@ -19,10 +20,24 @@ export class StationsService {
     private readonly dbService: DbService,
     private readonly supervisor: SupervisorService,
     private httpService: HttpService,
+    private usersService: UsersService,
   ) {}
 
   async create(createStationDto: CreateStationDto): Promise<StationClass> {
-    const station = await this.dbService.stations().insert(createStationDto);
+    const { user, ...stationDto } = createStationDto;
+    //Create station in db
+    const station = await this.dbService
+      .stations()
+      .insert({ active: true, ...stationDto });
+    //Create user in db
+    const userDb = await this.usersService.create({
+      station: station._id,
+      role: 'station',
+      ...user,
+    });
+    await this.dbService
+      .stations()
+      .update({ _id: station._id }, { $set: { user: userDb._id } });
     // Station directory path
     const station_path = path.join(
       '/backend',
@@ -54,12 +69,16 @@ export class StationsService {
   }
 
   async findOne(id: string): Promise<StationClass> {
-    const station = await this.dbService.stations().findOne({ _id: id });
+    const { user, ...station } = await this.dbService
+      .stations()
+      .findOne({ _id: id });
+    const userData = await this.usersService.findById(user);
     const { state } = await this.supervisor.getProcessInfo(
       `ThRadio_${station._id}`,
     );
     return {
       state,
+      user: userData,
       ...station,
     };
   }
@@ -69,9 +88,20 @@ export class StationsService {
     updateStationDto: UpdateStationDto,
   ): Promise<StationClass> {
     const station_path = path.join('/backend', 'stations', `ThRadio_${id}`);
-    await this.dbService
-      .stations()
-      .update<StationClass>({ _id: id }, updateStationDto);
+    const { user, ...stationDto } = updateStationDto;
+    const station = await this.dbService.stations().update<StationClass>(
+      { _id: id },
+      { $set: { stationDto } },
+      {
+        returnUpdatedDocs: true,
+      },
+    );
+    //Update or remove user
+    if (user) {
+      await this.usersService.update(station.user, user);
+    } else {
+      await this.dbService.users().remove({ station: id }, {});
+    }
     // Create icecast.xml file
     await this.createIcecast(station_path, updateStationDto);
     await this.supervisor.restartProcess(`ThRadio_${id}`);
@@ -82,6 +112,8 @@ export class StationsService {
     const station_path = path.join('/backend', 'stations', `ThRadio_${id}`);
     //Remove station of db
     await this.dbService.stations().remove({ _id: id }, {});
+    // Remove user of db
+    await this.dbService.users().remove({ station: id }, {});
     // Remove station folder
     if (fs.existsSync(station_path)) {
       fs.rmdirSync(station_path, { recursive: true });
