@@ -39,7 +39,10 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string | UserClass, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string | UserClass,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserClass> {
     const { password, ...userDto } = updateUserDto;
     if (password) {
       const salt = await bcrypt.genSalt();
@@ -51,14 +54,16 @@ export class UsersService {
             ...userDto,
           },
         },
+        { upsert: true, returnUpdatedDocs: true },
       );
       return user;
     } else {
       const user = await this.dbService.users().update<UserClass>(
         { _id: id },
         {
-          $set: { userDto },
+          $set: { ...userDto },
         },
+        { returnUpdatedDocs: true },
       );
       return user;
     }

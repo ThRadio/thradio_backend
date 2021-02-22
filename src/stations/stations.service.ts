@@ -89,18 +89,50 @@ export class StationsService {
   ): Promise<StationClass> {
     const station_path = path.join('/backend', 'stations', `ThRadio_${id}`);
     const { user, ...stationDto } = updateStationDto;
-    const station = await this.dbService.stations().update<StationClass>(
-      { _id: id },
-      { $set: { stationDto } },
-      {
-        returnUpdatedDocs: true,
-      },
-    );
-    //Update or remove user
+
+    //Update/create or remove user
     if (user) {
-      await this.usersService.update(station.user, user);
+      let station = await this.dbService
+        .stations()
+        .findOne<StationClass>({ _id: id });
+      //Update user
+      if (station.user) {
+        const userDb = await this.usersService.update(station.user, {
+          station: id,
+          role: 'station',
+          ...user,
+        });
+        station = await this.dbService.stations().update<StationClass>(
+          { _id: id },
+          { $set: { user: userDb._id, ...stationDto } },
+          {
+            returnUpdatedDocs: true,
+          },
+        );
+      } else {
+        //Create user
+        const userDb = await this.usersService.create({
+          station: id,
+          role: 'station',
+          ...user,
+        });
+        station = await this.dbService.stations().update<StationClass>(
+          { _id: id },
+          { $set: { user: userDb._id, ...stationDto } },
+          {
+            returnUpdatedDocs: true,
+          },
+        );
+      }
     } else {
-      await this.dbService.users().remove({ station: id }, {});
+      const station = await this.dbService.stations().update<StationClass>(
+        { _id: id },
+        { $set: { stationDto } },
+        {
+          returnUpdatedDocs: true,
+        },
+      );
+      await this.dbService.users().remove({ _id: station.user }, {});
     }
     // Create icecast.xml file
     await this.createIcecast(station_path, updateStationDto);
