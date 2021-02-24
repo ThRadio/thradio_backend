@@ -2,7 +2,7 @@ version: "3"
 
 services:
   backend:
-    image: therhenals/thradio_backend
+    image: therhenals/thradio_backend:stable
     build: .
     ports:
       - 3010:3010
