@@ -8,6 +8,7 @@ import { UserClass } from 'src/users/classes/user.class';
 //Dto
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 //Libreries
 import { compare } from 'bcrypt';
 
@@ -34,6 +35,7 @@ export class AuthService {
     const user = await this.validateUser(loginDto.username, loginDto.password);
     const payload = {
       username: user.username,
+      station: user.station || null,
       email: user.email,
       sub: user._id,
       role: user.role,
@@ -79,6 +81,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign({
         username: user.username,
+        station: user.station || null,
         email: user.email,
         sub: user._id,
         role: user.role,
@@ -96,6 +99,10 @@ export class AuthService {
   async profile(username: string) {
     const user = await this.usersService.findOne(username);
     const { password, ...newUser } = user;
-    return newUser;
+    return { scope: [newUser.role], ...newUser };
+  }
+
+  async updateProfile(id: string, profile: UpdateProfileDto) {
+    return await this.usersService.update(id, profile);
   }
 }

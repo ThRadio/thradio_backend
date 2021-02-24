@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   UseGuards,
   Request,
 } from '@nestjs/common';
@@ -11,7 +12,7 @@ import { AuthService } from './auth.service';
 //Dto
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
-
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthGuard } from 'src/utils/guards/auth.guard';
 
 @Controller('auth')
@@ -32,6 +33,12 @@ export class AuthController {
   @Get('me')
   async user(@Request() req: any) {
     return await this.authService.profile(req.user.username);
+  }
+
+  @UseGuards(AuthGuard)
+  @Put('me')
+  async updateUser(@Request() req: any, @Body() profile: UpdateProfileDto) {
+    return await this.authService.updateProfile(req.user.sub, profile);
   }
 
   @Post('logout')

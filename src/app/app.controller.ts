@@ -49,8 +49,6 @@ export class AppController {
   }
 
   @Get('info')
-  @UseGuards(AuthGuard)
-  @SetMetadata('roles', ['admin'])
   async info() {
     return await this.appService.info();
   }

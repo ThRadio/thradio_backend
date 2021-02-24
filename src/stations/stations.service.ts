@@ -72,7 +72,7 @@ export class StationsService {
     const { user, ...station } = await this.dbService
       .stations()
       .findOne({ _id: id });
-    const userData = await this.usersService.findById(user);
+    const { password, ...userData } = await this.usersService.findById(user);
     const { state } = await this.supervisor.getProcessInfo(
       `ThRadio_${station._id}`,
     );
@@ -240,10 +240,11 @@ export class StationsService {
   }
 
   //Icecast
-  async statistics(port: number): Promise<StatisticsClass> {
+  async statistics(id: string): Promise<StatisticsClass> {
     try {
+      const { icecast_port } = await this.findOne(id);
       const { data } = await this.httpService
-        .get(`http://stations:${port}/status-json.xsl`)
+        .get(`http://stations:${icecast_port}/status-json.xsl`)
         .toPromise();
       return {
         listeners: data.icestats.source.listeners || 0,

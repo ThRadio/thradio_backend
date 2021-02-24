@@ -21,6 +21,7 @@ import { CreateStationDto } from './dto/create-station.dto';
 import { UpdateStationDto } from './dto/update-station.dto';
 //Guards
 import { AuthGuard } from 'src/utils/guards/auth.guard';
+import { StationGuard } from 'src/utils/guards/station.guard';
 
 @ApiTags('stations')
 @Controller('stations')
@@ -43,15 +44,15 @@ export class StationsController {
     return await this.stationsService.findAll();
   }
 
-  @UseGuards(AuthGuard)
-  @SetMetadata('roles', ['admin'])
+  @UseGuards(AuthGuard, StationGuard)
+  @SetMetadata('roles', ['admin', 'station'])
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<StationClass> {
     return await this.stationsService.findOne(id);
   }
 
-  @UseGuards(AuthGuard)
-  @SetMetadata('roles', ['admin'])
+  @UseGuards(AuthGuard, StationGuard)
+  @SetMetadata('roles', ['admin', 'station'])
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -68,32 +69,32 @@ export class StationsController {
   }
 
   //Supervisor
-  @UseGuards(AuthGuard)
-  @SetMetadata('roles', ['admin'])
+  @UseGuards(AuthGuard, StationGuard)
+  @SetMetadata('roles', ['admin', 'station'])
   @Get('start/:id')
   async start(@Param('id') id: string) {
     await this.stationsService.start(id);
   }
 
-  @UseGuards(AuthGuard)
-  @SetMetadata('roles', ['admin'])
+  @UseGuards(AuthGuard, StationGuard)
+  @SetMetadata('roles', ['admin', 'station'])
   @Get('stop/:id')
   async stop(@Param('id') id: string) {
     await this.stationsService.stop(id);
   }
 
-  @UseGuards(AuthGuard)
-  @SetMetadata('roles', ['admin'])
+  @UseGuards(AuthGuard, StationGuard)
+  @SetMetadata('roles', ['admin', 'station'])
   @Get('restart/:id')
   async restart(@Param('id') id: string) {
     await this.stationsService.restart(id);
   }
 
   //Icecast
-  @UseGuards(AuthGuard)
-  @SetMetadata('roles', ['admin'])
-  @Get('statistics/:port')
-  async statistics(@Param('port') port: number): Promise<StatisticsClass> {
-    return await this.stationsService.statistics(port);
+  @UseGuards(AuthGuard, StationGuard)
+  @SetMetadata('roles', ['admin', 'station'])
+  @Get('statistics/:id')
+  async statistics(@Param('id') id: string): Promise<StatisticsClass> {
+    return await this.stationsService.statistics(id);
   }
 }
