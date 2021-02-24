@@ -41,16 +41,20 @@ export class DbService {
       unique: true,
       sparse: true,
     });
-    //Users index
     this.db.stations.ensureIndex({
+      fieldName: 'port',
+      unique: true,
+    });
+    //Users index
+    this.db.users.ensureIndex({
       fieldName: 'email',
       unique: true,
     });
-    this.db.stations.ensureIndex({
+    this.db.users.ensureIndex({
       fieldName: 'username',
       unique: true,
     });
-    this.db.stations.ensureIndex({
+    this.db.users.ensureIndex({
       fieldName: 'station',
       unique: true,
       sparse: true,
