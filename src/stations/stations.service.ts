@@ -13,6 +13,7 @@ import { UpdateStationDto } from './dto/update-station.dto';
 import { create } from 'xmlbuilder2';
 import * as fs from 'fs';
 import * as path from 'path';
+import { UserClass } from 'src/users/classes/user.class';
 
 @Injectable()
 export class StationsService {
@@ -30,14 +31,16 @@ export class StationsService {
       .stations()
       .insert({ active: true, ...stationDto });
     //Create user in db
-    const userDb = await this.usersService.create({
-      station: station._id,
-      role: 'station',
-      ...user,
-    });
-    await this.dbService
-      .stations()
-      .update({ _id: station._id }, { $set: { user: userDb._id } });
+    if (user) {
+      const userDb = await this.usersService.create({
+        station: station._id,
+        role: 'station',
+        ...user,
+      });
+      await this.dbService
+        .stations()
+        .update({ _id: station._id }, { $set: { user: userDb._id } });
+    }
     // Station directory path
     const station_path = path.join(
       '/backend',
@@ -72,7 +75,11 @@ export class StationsService {
     const { user, ...station } = await this.dbService
       .stations()
       .findOne({ _id: id });
-    const { password, ...userData } = await this.usersService.findById(user);
+    let userData: UserClass;
+    if (user) {
+      userData = await this.usersService.findById(user);
+      delete userData.password;
+    }
     const { state } = await this.supervisor.getProcessInfo(
       `ThRadio_${station._id}`,
     );
@@ -89,7 +96,6 @@ export class StationsService {
   ): Promise<StationClass> {
     const station_path = path.join('/backend', 'stations', `ThRadio_${id}`);
     const { user, ...stationDto } = updateStationDto;
-
     //Update/create or remove user
     if (user) {
       let station = await this.dbService
@@ -125,14 +131,14 @@ export class StationsService {
         );
       }
     } else {
-      const station = await this.dbService.stations().update<StationClass>(
+      await this.dbService.stations().update<StationClass>(
         { _id: id },
-        { $set: { stationDto } },
+        { $set: { user: null, ...stationDto } },
         {
           returnUpdatedDocs: true,
         },
       );
-      await this.dbService.users().remove({ _id: station.user }, {});
+      await this.dbService.users().remove({ station: id }, {});
     }
     // Create icecast.xml file
     await this.createIcecast(station_path, updateStationDto);

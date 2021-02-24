@@ -42,7 +42,7 @@ export class DbService {
       sparse: true,
     });
     this.db.stations.ensureIndex({
-      fieldName: 'port',
+      fieldName: 'icecast_port',
       unique: true,
     });
     //Users index

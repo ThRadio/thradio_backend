@@ -14,7 +14,6 @@ export class StationGuard implements CanActivate {
     const result = await this.authService.verifyToken(
       request.headers.authorization,
     );
-    console.log(result);
     if (result.station == request.params.id || result.role == 'admin') {
       return true;
     } else return false;
